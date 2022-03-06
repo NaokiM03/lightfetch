@@ -1,4 +1,4 @@
-use sysinfo::{System, SystemExt};
+use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
 
 fn main() {
     let mut sys = System::new_all();
@@ -30,13 +30,28 @@ fn main() {
         )
     };
 
+    let shell = {
+        // TODO: use anyhow and thiserror
+        let current_process_pid = get_current_pid().unwrap();
+        let current_process = sys.process(current_process_pid).unwrap();
+        let parent_process_pid = current_process.parent().unwrap();
+        let parent_process = sys.process(parent_process_pid).unwrap();
+        let shell = match parent_process.name() {
+            // "cmd.exe" => "CommandPrompt", // I won't use this.
+            "powershell.exe" => "PowerShell",
+            "nu.exe" => "Nu",
+            _ => "Unkwon",
+        };
+        format!("Shell: {}", shell)
+    };
+
     let info = format!(
         r#"
 ██████████████  ██████████████  {}
 ██████████████  ██████████████  {}
 ██████████████  ██████████████  {}
 ██████████████  ██████████████  {}
-██████████████  ██████████████
+██████████████  ██████████████  {}
 ██████████████  ██████████████
 ██████████████  ██████████████
 
@@ -48,7 +63,7 @@ fn main() {
 ██████████████  ██████████████
 ██████████████  ██████████████
 "#,
-        &user, &under_line, &os, &uptime
+        &user, &under_line, &os, &uptime, &shell
     );
     println!("{info}");
 }
