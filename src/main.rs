@@ -7,7 +7,7 @@ fn main() {
     let user = format!("{}@{}", whoami::username(), whoami::hostname());
     let under_line = "-".repeat(user.len());
 
-    let os = format!("OS: {}", whoami::distro());
+    let os = whoami::distro();
 
     let uptime = {
         const SECONDS_PER_MINUTE: u64 = 60;
@@ -25,7 +25,7 @@ fn main() {
         let minutes = remaining / SECONDS_PER_MINUTE;
 
         format!(
-            "Uptime: {} weeks {} days {} hours {} minutes",
+            "{} weeks {} days {} hours {} minutes",
             weeks, days, hours, minutes
         )
     };
@@ -36,13 +36,12 @@ fn main() {
         let current_process = sys.process(current_process_pid).unwrap();
         let parent_process_pid = current_process.parent().unwrap();
         let parent_process = sys.process(parent_process_pid).unwrap();
-        let shell = match parent_process.name() {
+        match parent_process.name() {
             // "cmd.exe" => "CommandPrompt", // I won't use this.
             "powershell.exe" => "PowerShell",
             "nu.exe" => "Nu",
             _ => "Unkwon",
-        };
-        format!("Shell: {}", shell)
+        }
     };
 
     let cpu = {
@@ -61,15 +60,13 @@ fn main() {
         let from = format!("{}-Core", cpu.cores);
         let to = format!("{}-Cores {}-Threads", cpu.cores, cpu.threads);
         // available on AMD Ryzen
-        let cpu = if cpu.name.contains(&from) {
+        if cpu.name.contains(&from) {
             cpu.name.replace(&from, &to)
         } else {
             cpu.name
         }
         .trim()
-        .to_owned();
-
-        format!("CPU: {}", cpu)
+        .to_owned()
     };
 
     let memory = {
@@ -88,7 +85,7 @@ fn main() {
         let usage_rate = (used / total * 100.).ceil() as u64;
         let total = total.ceil() as u64;
         let used = used.ceil() as u64;
-        format!("Memory: {}GB / {} GB ({}%)", used, total, usage_rate)
+        format!("{}GB / {} GB ({}%)", used, total, usage_rate)
     };
 
     let monitors = {
@@ -100,19 +97,20 @@ fn main() {
                 format!("{}x{}", physical_size.width, physical_size.height)
             })
             .collect();
-        format!("Monitors: {}", resolutions.join(" "))
+        format!("{}", resolutions.join(" "))
     };
 
+    // TODO: auto adjustment of paddings behind item names
     let info = format!(
         r#"
     ##############  ##############  {}
     ##############  ##############  {}
-    ##############  ##############  {}
-    ##############  ##############  {}
-    ##############  ##############  {}
-    ##############  ##############  {}
-    ##############  ##############  {}
-                                    {}
+    ##############  ##############  OS:       {}
+    ##############  ##############  Uptime:   {}
+    ##############  ##############  Shell:    {}
+    ##############  ##############  CPU:      {}
+    ##############  ##############  Memory:   {}
+                                    Monitors: {}
     ##############  ##############
     ##############  ##############
     ##############  ##############
