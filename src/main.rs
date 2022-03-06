@@ -1,5 +1,48 @@
 use sysinfo::{get_current_pid, ProcessExt, ProcessorExt, System, SystemExt};
 
+#[derive(Debug)]
+struct Content {
+    key: String,
+    padding: usize,
+    value: String,
+}
+
+impl Content {
+    fn new(key: &str, value: &str) -> Self {
+        Content {
+            key: key.to_owned(),
+            padding: 0,
+            value: value.to_owned(),
+        }
+    }
+
+    fn to_string(&self) -> String {
+        format!("{}: {}{}", self.key, " ".repeat(self.padding), self.value)
+    }
+}
+
+fn get_logo() -> String {
+    r#"
+###############  ###############
+###############  ###############
+###############  ###############
+###############  ###############
+###############  ###############
+###############  ###############
+###############  ###############
+                                
+###############  ###############
+###############  ###############
+###############  ###############
+###############  ###############
+###############  ###############
+###############  ###############
+###############  ###############
+    "#
+    .trim()
+    .to_owned()
+}
+
 fn main() {
     let mut sys = System::new_all();
     sys.refresh_all();
@@ -7,7 +50,7 @@ fn main() {
     let user = format!("{}@{}", whoami::username(), whoami::hostname());
     let under_line = "-".repeat(user.len());
 
-    let os = whoami::distro();
+    let os = Content::new("OS", &whoami::distro());
 
     let uptime = {
         const SECONDS_PER_MINUTE: u64 = 60;
@@ -24,9 +67,12 @@ fn main() {
         let remaining = remaining - hours * SECONDS_PER_HOUR;
         let minutes = remaining / SECONDS_PER_MINUTE;
 
-        format!(
-            "{} weeks {} days {} hours {} minutes",
-            weeks, days, hours, minutes
+        Content::new(
+            "Uptime",
+            &format!(
+                "{} weeks {} days {} hours {} minutes",
+                weeks, days, hours, minutes
+            ),
         )
     };
 
@@ -36,12 +82,15 @@ fn main() {
         let current_process = sys.process(current_process_pid).unwrap();
         let parent_process_pid = current_process.parent().unwrap();
         let parent_process = sys.process(parent_process_pid).unwrap();
-        match parent_process.name() {
-            // "cmd.exe" => "CommandPrompt", // I won't use this.
-            "powershell.exe" => "PowerShell",
-            "nu.exe" => "Nu",
-            _ => "Unkwon",
-        }
+        Content::new(
+            "Shell",
+            match parent_process.name() {
+                // "cmd.exe" => "CommandPrompt", // I won't use this.
+                "powershell.exe" => "PowerShell",
+                "nu.exe" => "Nu",
+                _ => "Unkwon",
+            },
+        )
     };
 
     let cpu = {
@@ -60,13 +109,15 @@ fn main() {
         let from = format!("{}-Core", cpu.cores);
         let to = format!("{}-Cores {}-Threads", cpu.cores, cpu.threads);
         // available on AMD Ryzen
-        if cpu.name.contains(&from) {
-            cpu.name.replace(&from, &to)
-        } else {
-            cpu.name
-        }
-        .trim()
-        .to_owned()
+        Content::new(
+            "CPU",
+            if cpu.name.contains(&from) {
+                cpu.name.replace(&from, &to)
+            } else {
+                cpu.name
+            }
+            .trim(),
+        )
     };
 
     let memory = {
@@ -85,7 +136,10 @@ fn main() {
         let usage_rate = (used / total * 100.).ceil() as u64;
         let total = total.ceil() as u64;
         let used = used.ceil() as u64;
-        format!("{}GB / {} GB ({}%)", used, total, usage_rate)
+        Content::new(
+            "Memory",
+            &format!("{}GB / {} GB ({}%)", used, total, usage_rate),
+        )
     };
 
     let monitors = {
@@ -97,29 +151,31 @@ fn main() {
                 format!("{}x{}", physical_size.width, physical_size.height)
             })
             .collect();
-        format!("{}", resolutions.join(" "))
+        Content::new("Monitors", &resolutions.join(" "))
     };
 
-    // TODO: auto adjustment of paddings behind item names
-    let info = format!(
-        r#"
-    ##############  ##############  {}
-    ##############  ##############  {}
-    ##############  ##############  OS:       {}
-    ##############  ##############  Uptime:   {}
-    ##############  ##############  Shell:    {}
-    ##############  ##############  CPU:      {}
-    ##############  ##############  Memory:   {}
-                                    Monitors: {}
-    ##############  ##############
-    ##############  ##############
-    ##############  ##############
-    ##############  ##############
-    ##############  ##############
-    ##############  ##############
-    ##############  ##############
-    "#,
-        &user, &under_line, &os, &uptime, &shell, &cpu, &memory, &monitors
-    );
-    println!("{info}");
+    let mut info = Vec::new();
+
+    info.push(user);
+    info.push(under_line);
+
+    let mut contents = {
+        let mut v = vec![os, uptime, shell, cpu, memory, monitors];
+        let max_key_length = v.iter().map(|x| x.key.len()).max().unwrap();
+        v.iter_mut().for_each(|x| {
+            x.padding = max_key_length - x.key.len();
+        });
+        v.iter().map(|x| x.to_string()).collect()
+    };
+    info.append(&mut contents);
+
+    let logo: Vec<String> = get_logo().lines().map(|x| x.to_owned()).collect();
+
+    // assert!(logo.len() >= user.to_string().lines().count() + info.len());
+
+    info.resize(logo.len(), String::default());
+
+    logo.iter().zip(info.iter()).for_each(|(left, right)| {
+        println!("    {}  {}", left, right);
+    });
 }
