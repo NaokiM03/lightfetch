@@ -72,6 +72,25 @@ fn main() {
         format!("CPU: {}", cpu)
     };
 
+    let memory = {
+        let total = sys.total_memory() as f64
+            * 1000. / 1024. // normalize KB in sysinfo
+            / 1024. // MB
+            / 1024. // GB
+            ;
+
+        let used = sys.used_memory() as f64
+            * 1000. / 1024. // normalize KB in sysinfo
+            / 1024. // MB
+            / 1024. // GB
+            ;
+
+        let usage_rate = (used / total * 100.).ceil() as u64;
+        let total = total.ceil() as u64;
+        let used = used.ceil() as u64;
+        format!("Memory: {}GB / {} GB ({}%)", used, total, usage_rate)
+    };
+
     let info = format!(
         r#"
     ██████████████  ██████████████  {}
@@ -80,7 +99,7 @@ fn main() {
     ██████████████  ██████████████  {}
     ██████████████  ██████████████  {}
     ██████████████  ██████████████  {}
-    ██████████████  ██████████████
+    ██████████████  ██████████████  {}
 
     ██████████████  ██████████████
     ██████████████  ██████████████
@@ -90,7 +109,7 @@ fn main() {
     ██████████████  ██████████████
     ██████████████  ██████████████
     "#,
-        &user, &under_line, &os, &uptime, &shell, &cpu
+        &user, &under_line, &os, &uptime, &shell, &cpu, &memory
     );
     println!("{info}");
 }
