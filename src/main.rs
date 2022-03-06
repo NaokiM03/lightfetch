@@ -91,6 +91,18 @@ fn main() {
         format!("Memory: {}GB / {} GB ({}%)", used, total, usage_rate)
     };
 
+    let monitors = {
+        let event_loop = winit::event_loop::EventLoop::new();
+        let resolutions: Vec<String> = event_loop
+            .available_monitors()
+            .map(|x| {
+                let physical_size = x.size();
+                format!("{}x{}", physical_size.width, physical_size.height)
+            })
+            .collect();
+        format!("Monitors: {}", resolutions.join(" "))
+    };
+
     let info = format!(
         r#"
     ██████████████  ██████████████  {}
@@ -100,7 +112,7 @@ fn main() {
     ██████████████  ██████████████  {}
     ██████████████  ██████████████  {}
     ██████████████  ██████████████  {}
-
+                                    {}
     ██████████████  ██████████████
     ██████████████  ██████████████
     ██████████████  ██████████████
@@ -109,7 +121,7 @@ fn main() {
     ██████████████  ██████████████
     ██████████████  ██████████████
     "#,
-        &user, &under_line, &os, &uptime, &shell, &cpu, &memory
+        &user, &under_line, &os, &uptime, &shell, &cpu, &memory, &monitors
     );
     println!("{info}");
 }
