@@ -3,6 +3,13 @@ name = "lightfetch"
 version = "0.1.0"
 edition = "2021"
 
+[profile.release]
+debug = 0
+lto = true
+opt-level = 3
+codegen-units = 1
+strip = "symbols"
+
 [dependencies]
 num_cpus = "1.13.1"
 sysinfo = "0.23.5"
