@@ -1,5 +1,15 @@
 use sysinfo::{get_current_pid, ProcessExt, ProcessorExt, System, SystemExt};
 
+trait Color {
+    fn blue(&self) -> String;
+}
+
+impl Color for str {
+    fn blue(&self) -> String {
+        format!("\u{001b}[94m{}\u{001b}[0m", self)
+    }
+}
+
 #[derive(Debug)]
 struct Content {
     key: String,
@@ -17,7 +27,12 @@ impl Content {
     }
 
     fn to_string(&self) -> String {
-        format!("{}: {}{}", self.key, " ".repeat(self.padding), self.value)
+        format!(
+            "{}: {}{}",
+            self.key.blue(),
+            " ".repeat(self.padding),
+            self.value
+        )
     }
 }
 
@@ -156,7 +171,7 @@ fn main() {
 
     let mut info = Vec::new();
 
-    info.push(user);
+    info.push(user.blue());
     info.push(under_line);
 
     let mut contents = {
@@ -169,7 +184,7 @@ fn main() {
     };
     info.append(&mut contents);
 
-    let logo: Vec<String> = get_logo().lines().map(|x| x.to_owned()).collect();
+    let logo: Vec<String> = get_logo().lines().map(|x| x.blue()).collect();
 
     // assert!(logo.len() >= user.to_string().lines().count() + info.len());
 
