@@ -1,4 +1,4 @@
-use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
+use sysinfo::{get_current_pid, ProcessExt, ProcessorExt, System, SystemExt};
 
 fn main() {
     let mut sys = System::new_all();
@@ -45,25 +45,52 @@ fn main() {
         format!("Shell: {}", shell)
     };
 
+    let cpu = {
+        struct Cpu {
+            name: String,
+            cores: usize,
+            threads: usize,
+        }
+
+        let cpu = Cpu {
+            name: sys.global_processor_info().brand().to_owned(),
+            cores: num_cpus::get_physical(),
+            threads: num_cpus::get(),
+        };
+
+        let from = format!("{}-Core", cpu.cores);
+        let to = format!("{}-Cores {}-Threads", cpu.cores, cpu.threads);
+        // available on AMD Ryzen
+        let cpu = if cpu.name.contains(&from) {
+            cpu.name.replace(&from, &to)
+        } else {
+            cpu.name
+        }
+        .trim()
+        .to_owned();
+
+        format!("CPU: {}", cpu)
+    };
+
     let info = format!(
         r#"
-██████████████  ██████████████  {}
-██████████████  ██████████████  {}
-██████████████  ██████████████  {}
-██████████████  ██████████████  {}
-██████████████  ██████████████  {}
-██████████████  ██████████████
-██████████████  ██████████████
+    ██████████████  ██████████████  {}
+    ██████████████  ██████████████  {}
+    ██████████████  ██████████████  {}
+    ██████████████  ██████████████  {}
+    ██████████████  ██████████████  {}
+    ██████████████  ██████████████  {}
+    ██████████████  ██████████████
 
-██████████████  ██████████████
-██████████████  ██████████████
-██████████████  ██████████████
-██████████████  ██████████████
-██████████████  ██████████████
-██████████████  ██████████████
-██████████████  ██████████████
-"#,
-        &user, &under_line, &os, &uptime, &shell
+    ██████████████  ██████████████
+    ██████████████  ██████████████
+    ██████████████  ██████████████
+    ██████████████  ██████████████
+    ██████████████  ██████████████
+    ██████████████  ██████████████
+    ██████████████  ██████████████
+    "#,
+        &user, &under_line, &os, &uptime, &shell, &cpu
     );
     println!("{info}");
 }
