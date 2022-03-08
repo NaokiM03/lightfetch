@@ -134,7 +134,15 @@ fn main() {
         )
     };
 
-    let cpu = Content::new("CPU", &vec![sys.global_processor_info().brand()]);
+    let cpu = {
+        let cpu = sys.global_processor_info().brand();
+        let cores_and_threads = &format!(
+            "{} Cores {} Threads",
+            num_cpus::get_physical(),
+            num_cpus::get(),
+        );
+        Content::new("CPU", &vec![cpu, cores_and_threads])
+    };
 
     let gpu = {
         let com_con = COMLibrary::new().unwrap();
