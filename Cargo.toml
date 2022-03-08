@@ -2,6 +2,11 @@
 name = "lightfetch"
 version = "0.1.0"
 edition = "2021"
+authors = ["NaokiM03"]
+description = "A command-line system information tool for Windows users"
+keywords = ["cli", "windows", "system", "command-line", "information"]
+repository = "https://github.com/NaokiM03/lightfetch"
+license = "MIT"
 
 [profile.release]
 debug = 0
