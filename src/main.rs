@@ -62,7 +62,11 @@ fn main() {
     let mut sys = System::new_all();
     sys.refresh_all();
 
-    let user = format!("{}@{}", whoami::username(), whoami::hostname());
+    let user = format!(
+        "{}@{}",
+        whoami::username().blue(),
+        whoami::hostname().blue()
+    );
     let under_line = "-".repeat(user.len());
 
     let os = Content::new("OS", &whoami::distro());
@@ -146,7 +150,7 @@ fn main() {
 
     let mut info = Vec::new();
 
-    info.push(user.blue());
+    info.push(user);
     info.push(under_line);
 
     let mut contents = {
