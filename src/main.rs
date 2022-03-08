@@ -1,4 +1,6 @@
+use std::collections::HashMap;
 use sysinfo::{get_current_pid, ProcessExt, ProcessorExt, System, SystemExt};
+use wmi::{COMLibrary, Variant, WMIConnection};
 
 trait Color {
     fn blue(&self) -> String;
@@ -14,28 +16,48 @@ impl Color for str {
 struct Content {
     key: String,
     padding: usize,
-    value: String,
+    value: Vec<String>,
 }
 
 impl Content {
-    fn new(key: &str, value: &str) -> Self {
+    fn new(key: &str, value: &[&str]) -> Self {
         Content {
             key: key.to_owned(),
             padding: 0,
-            value: value.to_owned(),
+            value: value.iter().map(|x| x.to_string()).collect(),
         }
     }
 
-    fn to_string(&self) -> String {
-        format!(
-            "{}: {}{}",
-            self.key.blue(),
-            " ".repeat(self.padding),
-            self.value
-        )
+    fn build(&self) -> Vec<String> {
+        if self.value.len() == 1 {
+            vec![format!(
+                "{}: {}{}",
+                self.key.blue(),
+                " ".repeat(self.padding),
+                self.value[0]
+            )]
+        } else {
+            let mut v = Vec::new();
+            self.value.iter().enumerate().for_each(|(i, x)| {
+                if i == 0 {
+                    v.push(format!(
+                        "{}: {}- {}",
+                        self.key.blue(),
+                        " ".repeat(self.padding),
+                        self.value[0]
+                    ));
+                } else {
+                    v.push(format!(
+                        "{}  - {}",
+                        " ".repeat(self.key.len() + self.padding),
+                        x
+                    ));
+                }
+            });
+            v
+        }
     }
 }
-
 fn get_logo() -> String {
     r#"
 ###############  ###############
@@ -69,7 +91,7 @@ fn main() {
     );
     let under_line = "-".repeat(user.len());
 
-    let os = Content::new("OS", &whoami::distro());
+    let os = Content::new("OS", &vec![whoami::distro().as_str()]);
 
     let uptime = {
         const SECONDS_PER_MINUTE: u64 = 60;
@@ -88,31 +110,50 @@ fn main() {
 
         Content::new(
             "Uptime",
-            &format!(
+            &vec![format!(
                 "{} weeks {} days {} hours {} minutes",
                 weeks, days, hours, minutes
-            ),
+            )
+            .as_str()],
         )
     };
 
     let shell = {
-        // TODO: use anyhow and thiserror
         let current_process_pid = get_current_pid().unwrap();
         let current_process = sys.process(current_process_pid).unwrap();
         let parent_process_pid = current_process.parent().unwrap();
         let parent_process = sys.process(parent_process_pid).unwrap();
         Content::new(
             "Shell",
-            match parent_process.name() {
-                // "cmd.exe" => "CommandPrompt", // I won't use this.
+            &vec![match parent_process.name() {
+                "cmd.exe" => "CommandPrompt",
                 "powershell.exe" => "PowerShell",
                 "nu.exe" => "Nu",
                 _ => "Unkwon",
-            },
+            }],
         )
     };
 
-    let cpu = Content::new("CPU", sys.global_processor_info().brand());
+    let cpu = Content::new("CPU", &vec![sys.global_processor_info().brand()]);
+
+    let gpu = {
+        let com_con = COMLibrary::new().unwrap();
+        let wmi_con = WMIConnection::new(com_con.into()).unwrap();
+        let result: Vec<HashMap<String, Variant>> = wmi_con
+            .raw_query("SELECT Caption FROM Win32_VideoController")
+            .unwrap();
+        let v = result
+            .iter()
+            .map(|x| {
+                let v = &*x.get("Caption").unwrap().to_owned();
+                match v {
+                    Variant::String(info) => info.as_str(),
+                    _ => "",
+                }
+            })
+            .collect::<Vec<&str>>();
+        Content::new("GPU", &v)
+    };
 
     let memory = {
         let total = sys.total_memory() as f64
@@ -132,7 +173,7 @@ fn main() {
         let used = used.ceil() as u64;
         Content::new(
             "Memory",
-            &format!("{}GB / {} GB ({}%)", used, total, usage_rate),
+            &vec![format!("{}GB / {} GB ({}%)", used, total, usage_rate).as_str()],
         )
     };
 
@@ -145,7 +186,7 @@ fn main() {
                 format!("{}x{}", physical_size.width, physical_size.height)
             })
             .collect();
-        Content::new("Monitors", &resolutions.join(" "))
+        Content::new("Monitors", &vec![resolutions.join(" ").as_str()])
     };
 
     let mut info = Vec::new();
@@ -154,20 +195,27 @@ fn main() {
     info.push(under_line);
 
     let mut contents = {
-        let mut v = vec![os, uptime, shell, cpu, memory, monitors];
+        let mut v = vec![os, uptime, shell, cpu, gpu, memory, monitors];
         let max_key_length = v.iter().map(|x| x.key.len()).max().unwrap();
         v.iter_mut().for_each(|x| {
             x.padding = max_key_length - x.key.len();
         });
-        v.iter().map(|x| x.to_string()).collect()
+        v.iter().map(|x| x.build()).flatten().collect()
     };
     info.append(&mut contents);
 
-    let logo: Vec<String> = get_logo().lines().map(|x| x.blue()).collect();
+    let mut logo: Vec<String> = get_logo().lines().map(|x| x.to_owned()).collect();
 
-    // assert!(logo.len() >= user.to_string().lines().count() + info.len());
+    if logo.len() > info.len() {
+        info.resize(logo.len(), String::default());
+    } else if logo.len() < info.len() {
+        logo.resize(
+            info.len(),
+            " ".repeat(logo.iter().map(|x| x.len()).max().unwrap()),
+        );
+    }
 
-    info.resize(logo.len(), String::default());
+    let logo: Vec<String> = logo.iter().map(|x| x.blue()).collect();
 
     logo.iter().zip(info.iter()).for_each(|(left, right)| {
         println!("    {}  {}", left, right);
