@@ -108,32 +108,7 @@ fn main() {
         )
     };
 
-    let cpu = {
-        struct Cpu {
-            name: String,
-            cores: usize,
-            threads: usize,
-        }
-
-        let cpu = Cpu {
-            name: sys.global_processor_info().brand().to_owned(),
-            cores: num_cpus::get_physical(),
-            threads: num_cpus::get(),
-        };
-
-        let from = format!("{}-Core", cpu.cores);
-        let to = format!("{}-Cores {}-Threads", cpu.cores, cpu.threads);
-        // available on AMD Ryzen
-        Content::new(
-            "CPU",
-            if cpu.name.contains(&from) {
-                cpu.name.replace(&from, &to)
-            } else {
-                cpu.name
-            }
-            .trim(),
-        )
-    };
+    let cpu = Content::new("CPU", sys.global_processor_info().brand());
 
     let memory = {
         let total = sys.total_memory() as f64
