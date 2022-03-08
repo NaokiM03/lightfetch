@@ -112,13 +112,13 @@ fn main() {
 
     let memory = {
         let total = sys.total_memory() as f64
-            * 1000. / 1024. // normalize KB in sysinfo
+            * 1000. / 1024. // In Windows, KB is actually often KiB
             / 1024. // MB
             / 1024. // GB
             ;
 
         let used = sys.used_memory() as f64
-            * 1000. / 1024. // normalize KB in sysinfo
+            * 1000. / 1024. // In Windows, KB is actually often KiB
             / 1024. // MB
             / 1024. // GB
             ;
