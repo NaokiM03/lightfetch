@@ -5,7 +5,7 @@
 <p align="center">System information tool for Windows user written in Rust
     <br>
     <br>
-    <img src="https://github.com/NaokiM03/lightfetch/blob/main/images/demo.png" alt="demo">
+    <img src="https://raw.githubusercontent.com/NaokiM03/lightfetch/bda19bc1e866e89cb8a1565483f43d6600f51af8/images/demo.png" alt="demo">
 </p>
 
 ## Motivation
