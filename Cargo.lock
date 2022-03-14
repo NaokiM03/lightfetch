@@ -330,7 +330,7 @@ dependencies = [
 
 [[package]]
 name = "lightfetch"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "num_cpus",
  "sysinfo",
