@@ -1,16 +1,7 @@
 use std::collections::HashMap;
 use sysinfo::{get_current_pid, CpuExt, ProcessExt, System, SystemExt};
 use wmi::{COMLibrary, Variant, WMIConnection};
-
-trait Color {
-    fn blue(&self) -> String;
-}
-
-impl Color for str {
-    fn blue(&self) -> String {
-        format!("\u{001b}[94m{}\u{001b}[0m", self)
-    }
-}
+use tiny_ansi::TinyAnsi;
 
 #[derive(Debug)]
 struct Content {
@@ -32,7 +23,7 @@ impl Content {
         if self.value.len() == 1 {
             vec![format!(
                 "{}: {}{}",
-                self.key.blue(),
+                self.key.bright_blue(),
                 " ".repeat(self.padding),
                 self.value[0]
             )]
@@ -42,7 +33,7 @@ impl Content {
                 if i == 0 {
                     v.push(format!(
                         "{}: {}- {}",
-                        self.key.blue(),
+                        self.key.bright_blue(),
                         " ".repeat(self.padding),
                         self.value[0]
                     ));
@@ -86,8 +77,8 @@ fn main() {
 
     let user = format!(
         "{}@{}",
-        whoami::username().blue(),
-        whoami::hostname().blue()
+        whoami::username().bright_blue(),
+        whoami::hostname().bright_blue()
     );
     let under_line = "-".repeat(user.len());
 
@@ -223,7 +214,7 @@ fn main() {
         );
     }
 
-    let logo: Vec<String> = logo.iter().map(|x| x.blue()).collect();
+    let logo: Vec<String> = logo.iter().map(|x| x.bright_blue()).collect();
 
     logo.iter().zip(info.iter()).for_each(|(left, right)| {
         println!("    {}  {}", left, right);

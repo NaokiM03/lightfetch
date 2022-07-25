@@ -21,3 +21,4 @@ sysinfo =  { version = "0.24.7", default-features = false }
 whoami = "1.2.1"
 winit = "0.26.1"
 wmi = "0.11.0"
+tiny-ansi = "0.1.0"

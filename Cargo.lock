@@ -454,6 +454,7 @@ version = "1.0.1"
 dependencies = [
  "num_cpus",
  "sysinfo",
+ "tiny-ansi",
  "whoami",
  "winit",
  "wmi",
@@ -911,6 +912,12 @@ dependencies = [
  "wasi",
  "winapi",
 ]
+
+[[package]]
+name = "tiny-ansi"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "13aaf6c73d43ec6ce35105098915b2e77939b01390d48e5e1ce3ca649e753d8c"
 
 [[package]]
 name = "toml"
