@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use sysinfo::{get_current_pid, ProcessExt, ProcessorExt, System, SystemExt};
+use sysinfo::{get_current_pid, CpuExt, ProcessExt, System, SystemExt};
 use wmi::{COMLibrary, Variant, WMIConnection};
 
 trait Color {
@@ -135,7 +135,7 @@ fn main() {
     };
 
     let cpu = {
-        let cpu = sys.global_processor_info().brand();
+        let cpu = sys.global_cpu_info().brand();
         let cores_and_threads = &format!(
             "{} Cores {} Threads",
             num_cpus::get_physical(),
