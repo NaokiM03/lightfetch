@@ -22,3 +22,6 @@ whoami = "1.2.3"
 winit = "0.27.5"
 wmi = "0.11.4"
 tiny-ansi = "0.1.0"
+
+[build-dependencies]
+static_vcruntime = "2.0.0"
