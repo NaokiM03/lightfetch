@@ -20,5 +20,5 @@ num_cpus = "1.15.0"
 sysinfo =  { version = "0.27.1", default-features = false }
 whoami = "1.2.3"
 winit = "0.27.5"
-wmi = "0.11.0"
+wmi = "0.11.4"
 tiny-ansi = "0.1.0"
