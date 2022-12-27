@@ -17,7 +17,7 @@ strip = "symbols"
 
 [dependencies]
 num_cpus = "1.15.0"
-sysinfo =  { version = "0.24.7", default-features = false }
+sysinfo =  { version = "0.27.1", default-features = false }
 whoami = "1.2.1"
 winit = "0.26.1"
 wmi = "0.11.0"
