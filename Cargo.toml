@@ -16,7 +16,7 @@ codegen-units = 1
 strip = "symbols"
 
 [dependencies]
-num_cpus = "1.13.1"
+num_cpus = "1.15.0"
 sysinfo =  { version = "0.24.7", default-features = false }
 whoami = "1.2.1"
 winit = "0.26.1"
