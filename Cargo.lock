@@ -652,7 +652,7 @@ dependencies = [
 
 [[package]]
 name = "lightfetch"
-version = "1.0.3"
+version = "1.0.4"
 dependencies = [
  "num_cpus",
  "static_vcruntime",
