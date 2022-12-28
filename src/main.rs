@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use sysinfo::{get_current_pid, CpuExt, ProcessExt, System, SystemExt};
-use wmi::{COMLibrary, Variant, WMIConnection};
 use tiny_ansi::TinyAnsi;
+use wmi::{COMLibrary, Variant, WMIConnection};
 
 #[derive(Debug)]
 struct Content {
