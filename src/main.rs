@@ -28,12 +28,12 @@ const LOGO_WIDTH: usize = 32;
 
 fn create_label(s: &str) -> String {
     let s = format!("{s}:");
-    format!("{s: <10}").bright_blue()
+    format!("{s: <12}").bright_blue()
 }
 
 fn create_fake_label() -> String {
     let empty_str = "";
-    format!("{empty_str: <10}")
+    format!("{empty_str: <12}")
 }
 
 fn main() {
@@ -159,19 +159,19 @@ fn main() {
         format!("{label}{memory}")
     };
 
-    let monitors = {
+    let resolution = {
         let event_loop = winit::event_loop::EventLoop::new();
-        let resolutions: Vec<String> = event_loop
+        let resolution = event_loop
             .available_monitors()
             .map(|x| {
                 let physical_size = x.size();
                 format!("{}x{}", physical_size.width, physical_size.height)
             })
-            .collect();
+            .collect::<Vec<String>>()
+            .join(" ");
 
-        let label = create_label("Monitors");
-        let monitors = resolutions.join(" ");
-        format!("{label}{monitors}")
+        let label = create_label("Resolution");
+        format!("{label}{resolution}")
     };
 
     let mut right_content = Vec::new();
@@ -184,7 +184,7 @@ fn main() {
     right_content.append(&mut cpu);
     right_content.append(&mut gpu);
     right_content.push(memory);
-    right_content.push(monitors);
+    right_content.push(resolution);
 
     let logo = get_logo();
     let mut left_content: Vec<String> = logo.lines().map(|x| x.to_owned().bright_blue()).collect();
