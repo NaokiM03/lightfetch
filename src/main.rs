@@ -155,24 +155,25 @@ fn main() {
     };
 
     let memory = {
-        let total = sys.total_memory() as f64
-            * 1000. / 1024. // In Windows, KB is actually often KiB
-            / 1024. // MB
-            / 1024. // GB
-            ;
-
         let used = sys.used_memory() as f64
-            * 1000. / 1024. // In Windows, KB is actually often KiB
-            / 1024. // MB
-            / 1024. // GB
+            / 1024f64 // KiB
+            / 1024f64 // MiB
+            / 1024f64 // GiB
             ;
 
-        let usage_rate = (used / total * 100.).ceil() as u64;
-        let total = total.ceil() as u64;
-        let used = used.ceil() as u64;
+        let total = sys.total_memory() as f64
+            / 1024f64 // KiB
+            / 1024f64 // MiB
+            / 1024f64 // GiB
+            ;
+
+        let usage_rate = used / total * 100f64;
+
+        // `Task Manager` apparently displays `GiB` values in `GB` units, so use `GB`.
+        // NOTE: It seems that `systeminfo` also displays `MiB` values in `MB` units.
         Content::new(
             "Memory",
-            &vec![format!("{}GB / {} GB ({}%)", used, total, usage_rate).as_str()],
+            &vec![format!("{:.1}GB / {:.1} GB ({:.1}%)", used, total, usage_rate).as_str()],
         )
     };
 
