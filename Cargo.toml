@@ -1,6 +1,6 @@
 [package]
 name = "lightfetch"
-version = "1.0.4"
+version = "1.0.5"
 edition = "2021"
 authors = ["NaokiM03"]
 description = "A command-line system information tool for Windows users"
