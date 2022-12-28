@@ -107,13 +107,13 @@ fn main() {
         let fake_label = create_fake_label();
         let cpu = sys.global_cpu_info().brand();
         let cores_and_threads = format!(
-            "{} Cores {} Threads",
+            "{} Cores / {} Threads",
             num_cpus::get_physical(),
             num_cpus::get(),
         );
         vec![
-            format!("{label}- {cpu}"),
-            format!("{fake_label}- {cores_and_threads}"),
+            format!("{label}{cpu}"),
+            format!("{fake_label}> {cores_and_threads}"),
         ]
     };
 
@@ -132,13 +132,8 @@ fn main() {
         });
         gpus.enumerate()
             .map(|(i, gpu)| {
-                if i == 0 {
-                    let label = create_label("GPU");
-                    format!("{label}- {gpu}")
-                } else {
-                    let fake_label = create_fake_label();
-                    format!("{fake_label}- {gpu}")
-                }
+                let label = create_label(&format!("GPU #{}", i));
+                format!("{label}{gpu}")
             })
             .collect::<Vec<String>>()
     };
