@@ -73,14 +73,27 @@ fn main() {
         format!("{label}{uptime}")
     };
 
-    let shell = {
-        let current_process_pid = get_current_pid().unwrap();
-        let current_process = sys.process(current_process_pid).unwrap();
-        let parent_process_pid = current_process.parent().unwrap();
-        let parent_process = sys.process(parent_process_pid).unwrap();
+    let lightfetch_process_pid = get_current_pid().unwrap();
+    let lightfetch_process = sys.process(lightfetch_process_pid).unwrap();
+    let shell_process_pid = lightfetch_process.parent().unwrap();
+    let shell_process = sys.process(shell_process_pid).unwrap();
+    let terminal_process_pid = shell_process.parent().unwrap();
+    let terminal_process = sys.process(terminal_process_pid).unwrap();
 
+    let terminal = {
+        let label = create_label("Terminal");
+        let terminal = match terminal_process.name() {
+            "explorer.exe" => "Win32 console",
+            "WindowsTerminal.exe" => "Windows Terminal",
+            "Code.exe" => "Visual Studio Code",
+            _ => "Unkwon",
+        };
+        format!("{label}{terminal}")
+    };
+
+    let shell = {
         let label = create_label("Shell");
-        let shell = match parent_process.name() {
+        let shell = match shell_process.name() {
             "cmd.exe" => "CommandPrompt",
             "powershell.exe" => "PowerShell",
             "nu.exe" => "Nu",
@@ -171,6 +184,7 @@ fn main() {
     right_content.push(under_line);
     right_content.push(os);
     right_content.push(uptime);
+    right_content.push(terminal);
     right_content.push(shell);
     right_content.append(&mut cpu);
     right_content.append(&mut gpu);
