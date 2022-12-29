@@ -31,11 +31,6 @@ fn create_label(s: &str) -> String {
     format!("{s: <12}").bright_blue()
 }
 
-fn create_fake_label() -> String {
-    let empty_str = "";
-    format!("{empty_str: <12}")
-}
-
 fn main() {
     let mut sys = System::new_all();
     sys.refresh_all();
@@ -102,19 +97,11 @@ fn main() {
         format!("{label}{shell}")
     };
 
-    let mut cpu = {
+    let cpu = {
         let label = create_label("CPU");
-        let fake_label = create_fake_label();
         let cpu = sys.global_cpu_info().brand();
-        let cores_and_threads = format!(
-            "{} Cores / {} Threads",
-            num_cpus::get_physical(),
-            num_cpus::get(),
-        );
-        vec![
-            format!("{label}{cpu}"),
-            format!("{fake_label}> {cores_and_threads}"),
-        ]
+        let cores_and_threads = format!("({}C/{}T)", num_cpus::get_physical(), num_cpus::get(),);
+        format!("{label}{cpu} {cores_and_threads}")
     };
 
     let mut gpu = {
@@ -181,7 +168,7 @@ fn main() {
     right_content.push(uptime);
     right_content.push(terminal);
     right_content.push(shell);
-    right_content.append(&mut cpu);
+    right_content.push(cpu);
     right_content.append(&mut gpu);
     right_content.push(memory);
     right_content.push(resolution);
