@@ -50,9 +50,9 @@ fn main() {
 
     let uptime = {
         const SECONDS_PER_MINUTE: u64 = 60;
-        const SECONDS_PER_HOUR: u64 = 3600;
-        const SECONDS_PER_DAY: u64 = 86400;
-        const SECONDS_PER_WEEK: u64 = 604800;
+        const SECONDS_PER_HOUR: u64 = SECONDS_PER_MINUTE * 60;
+        const SECONDS_PER_DAY: u64 = SECONDS_PER_HOUR * 24;
+        const SECONDS_PER_WEEK: u64 = SECONDS_PER_DAY * 7;
 
         let uptime = sys.uptime();
         let weeks = uptime / SECONDS_PER_WEEK;
