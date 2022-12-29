@@ -40,7 +40,7 @@ fn main() {
         let host_name = whoami::hostname().bright_blue();
         format!("{user_name}@{host_name}")
     };
-    let under_line = "-".repeat(user.len());
+    let under_line = "-".repeat(user.len() - "".bright_blue().len() * 2);
 
     let os = {
         let label = create_label("OS");
